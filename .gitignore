@@ -1,0 +1,11 @@
+# IntelliJ specific
+.idea/
+.metadata/
+.tmp/
+
+#sbt/scala specific
+movingaverage/target/
+movingaverage/project/target/
+
+#MAC
+.DS_Store
