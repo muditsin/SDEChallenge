@@ -63,3 +63,25 @@ Cassandra would be used to store the aggregated data produced by Spark jobs, to 
 #### Elasticsearch + Kibana (Optional)
 Elasticsearch is a distributed Search engine based on Lucene. Kibana is an open source data visualization dashboard for Elasticsearch.
 Together, they would be used to validate instrumented data and to perform full-text searches on tracking beacons. This allows faster analysis and fixing of any bugs in both the instrumentation or in the processing. Data in Elasticsearch would have a low retention.
+
+
+### System
+
+A system owner who wants to use the system would first come to the custom UI backed by the Governance service.
+They would define the tags they wished to use, the types of each of the tags, and the components pushing the same. 
+The system would suggest tag names that are standard to the organization, based on the description provided, so as to have better data management.
+The owner would then define what kind of analytics they would need from the data - Default - Search, Quick aggregates, Full analytics. They would also have the option of selecting the retention for each kind of data.
+Once these are defined and approved, the tracking beacons are ready to fire.
+SLA for Search and Quick aggregates - 5 minutes
+SLA for full aggregation - 45 minutes
+
+Tracking beacons from instrumented pages/applications would flow through the API Gateway and Load balancer to instances of the tracking rest service. The beacon would then be processed based on rules that would be cached within the tracking service, refreshed by making API calls to the governance service every 5 minutes.  
+
+The beacon is then written to Kafka, from where it is consumed by
+
+ 1. Batch ingestion service
+ 2. HDFS Connector
+
+The Batch ingestion service consumes data from Kafka and selectively pushes the data to Elasticsearch, and to Druid, based on configurations defined in the governance service.
+The data would then be available in the Custom UI to analyze.
+The data from HDFS would be processed by Spark Jobs in batches, combining upto of 30 minute data, and the post processed data would be stored in Cassandra, from where it can be queried and displayed in the Custom UI
